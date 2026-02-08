@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Personal Information Card</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f2f2f2;
+    padding:20px;
+}
+.container{
+    background:#fff;
+    max-width:600px;
+    margin:auto;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px #aaa;
+}
+h2{text-align:center;}
+input,textarea,select,button{
+    width:100%;
+    padding:8px;
+    margin:6px 0;
+}
+button{
+    background:#3897f0;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+.link{
+    color:#3897f0;
+    cursor:pointer;
+    text-align:center;
+    display:block;
+    margin-top:10px;
+}
+.hide{display:none;}
+
+.card{
+    border:2px solid black;
+    padding:15px;
+    text-align:center;
+}
+.profile{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid black;
+}
+.doc{
+    width:220px;
+    border:1px solid black;
+    margin-top:5px;
+}
+.download{
+    background:green;
+    margin-top:5px;
+}
+.addBlock{
+    border:1px solid #ccc;
+    padding:10px;
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN / REGISTER -->
+<div class="container" id="authBox">
+    <div id="loginBox">
+        <h2>Login</h2>
+        <input id="logUser" placeholder="Username">
+        <input id="logPass" type="password" placeholder="Password">
+        <button onclick="loginUser()">Login</button>
+        <span class="link" onclick="showRegister()">Don’t have an account? Sign up</span>
+    </div>
+
+    <div id="registerBox" class="hide">
+        <h2>Register</h2>
+        <input id="regUser" placeholder="Username">
+        <input id="regPass" type="password" placeholder="Password">
+        <button onclick="registerUser()">Register</button>
+        <span class="link" onclick="showLogin()">Already have an account? Log in</span>
+    </div>
+</div>
+
+<!-- FORM -->
+<div class="container hide" id="formBox">
+<h2>Personal Information</h2>
+
+<input type="file" id="profilePhoto" accept="image/*">
+
+<input id="name" placeholder="Full Name">
+<input type="date" id="dob">
+<input id="father" placeholder="Father Name">
+<input id="mother" placeholder="Mother Name">
+<textarea id="address" placeholder="Address"></textarea>
+
+<input id="aadhaar" placeholder="Aadhaar (12 digits)" maxlength="12"
+oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+<input type="file" id="aadhaarImg" accept="image/*">
+
+<input id="pan" placeholder="PAN Number">
+<input type="file" id="panImg" accept="image/*">
+
+<input id="phone" placeholder="Phone (10 digits)" maxlength="10"
+oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
+<h3>Additional Information (Optional)</h3>
+<div id="additionalContainer"></div>
+<button type="button" onclick="addAdditional()">+ Add Additional Info</button>
+
+<button onclick="generateCard()">Generate Card</button>
+</div>
+
+<!-- CARD -->
+<div class="container hide" id="cardBox">
+<h2>Personal Information Card</h2>
+
+<div class="card">
+<img id="pPhoto" class="profile"><br>
+<a id="dpProfile" download><button class="download">Download Profile Photo</button></a>
+
+<p><b>Name:</b> <span id="cName"></span></p>
+<p><b>DOB:</b> <span id="cDob"></span></p>
+<p><b>Father Name:</b> <span id="cFather"></span></p>
+<p><b>Mother Name:</b> <span id="cMother"></span></p>
+<p><b>Address:</b> <span id="cAddress"></span></p>
+<p><b>Phone:</b> <span id="cPhone"></span></p>
+<p><b>Aadhaar Number:</b> <span id="cAadhaar"></span></p>
+<p><b>PAN Number:</b> <span id="cPan"></span></p>
+
+<div id="additionalCardSection"></div>
+
+<p><b>Aadhaar Card</b></p>
+<img id="cAadhaarImg" class="doc"><br>
+<a id="dpAadhaar" download><button class="download">Download Aadhaar</button></a>
+
+<p><b>PAN Card</b></p>
+<img id="cPanImg" class="doc"><br>
+<a id="dpPan" download><button class="download">Download PAN</button></a>
+</div>
+
+<button onclick="window.print()">Print</button>
+</div>
+
+<script>
+let addCount=0;
+
+function showRegister(){loginBox.classList.add("hide");registerBox.classList.remove("hide");}
+function showLogin(){registerBox.classList.add("hide");loginBox.classList.remove("hide");}
+
+function registerUser(){
+localStorage.username=regUser.value;
+localStorage.password=regPass.value;
+alert("Registration successful. Please login.");
+showLogin();
+}
+
+function loginUser(){
+if(logUser.value===localStorage.username && logPass.value===localStorage.password){
+authBox.classList.add("hide");
+formBox.classList.remove("hide");
+}else alert("Invalid login");
+}
+
+function addAdditional(){
+addCount++;
+const div=document.createElement("div");
+div.className="addBlock";
+div.innerHTML=`
+<input placeholder="Title" id="addTitle${addCount}">
+<textarea placeholder="Description" id="addText${addCount}"></textarea>
+<label>Add photo?</label>
+<select onchange="togglePhoto(${addCount})" id="photoChoice${addCount}">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+<input type="file" id="addPhoto${addCount}" class="hide" accept="image/*">
+`;
+additionalContainer.appendChild(div);
+}
+
+function togglePhoto(id){
+document.getElementById("addPhoto"+id)
+.classList.toggle("hide",
+document.getElementById("photoChoice"+id).value==="no");
+}
+
+function generateCard(){
+if(aadhaar.value.length!==12){alert("Aadhaar must be 12 digits");return;}
+
+cName.innerText=name.value;
+cDob.innerText=dob.value;
+cFather.innerText=father.value;
+cMother.innerText=mother.value;
+cAddress.innerText=address.value;
+cPhone.innerText=phone.value;
+cAadhaar.innerText=aadhaar.value;
+cPan.innerText=pan.value;
+
+let pURL=URL.createObjectURL(profilePhoto.files[0]);
+pPhoto.src=pURL; dpProfile.href=pURL;
+
+let aURL=URL.createObjectURL(aadhaarImg.files[0]);
+cAadhaarImg.src=aURL; dpAadhaar.href=aURL;
+
+let panURL=URL.createObjectURL(panImg.files[0]);
+cPanImg.src=panURL; dpPan.href=panURL;
+
+additionalCardSection.innerHTML="";
+for(let i=1;i<=addCount;i++){
+let t=document.getElementById("addTitle"+i)?.value;
+let d=document.getElementById("addText"+i)?.value;
+let f=document.getElementById("addPhoto"+i);
+
+if(!t && !d) continue;
+
+let block=document.createElement("div");
+block.innerHTML=`<p><b>${t}:</b></p><p>${d}</p>`;
+
+if(f && f.files.length>0){
+let url=URL.createObjectURL(f.files[0]);
+block.innerHTML+=`<img src="${url}" class="doc"><br>
+<a href="${url}" download><button class="download">Download</button></a>`;
+}
+additionalCardSection.appendChild(block);
+}
+
+formBox.classList.add("hide");
+cardBox.classList.remove("hide");
+}
+</script>
+
+</body>
+</html>
